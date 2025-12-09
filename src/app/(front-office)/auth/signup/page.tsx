@@ -2,16 +2,16 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema, RegisterResponse, TRegister } from "../types/schemas/registerSchema";
+import { registerSchema, type RegisterResponse, type TRegister } from "../types/schemas/registerSchema";
 import { useMutation } from "@tanstack/react-query";
-import {register} from "@/app/(front-office)/auth/services/auth-api";
+import {registerUser} from "../services/auth.api" ;
 
 export function RegisterForm() {
 
   const mutation = useMutation<RegisterResponse, Error, TRegister>({
     mutationFn: async (values) => {
       const cmd = registerSchema.parse(values); // validation runtime
-      return register(cmd);
+      return registerUser(cmd);
     },
   });
 
