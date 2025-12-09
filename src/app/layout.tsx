@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Providers from './providers';
+// import Providers from './providers';
 import './globals.css';
 import { AppNuqsAdapter } from './nuqs-adapter';
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -13,11 +13,11 @@ export default function RootLayout({children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <Providers>
+        {/* <Providers> */}
           <AppNuqsAdapter>
             {children}
           </AppNuqsAdapter>
-          </Providers>
+          {/* </Providers> */}
       </body>
     </html>
   );
