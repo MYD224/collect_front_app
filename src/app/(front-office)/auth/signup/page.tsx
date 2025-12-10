@@ -1,17 +1,27 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterResponse, type TRegister } from "../types/schemas/registerSchema";
 import { useMutation } from "@tanstack/react-query";
 import {registerUser} from "../services/auth.api" ;
 
-export function RegisterForm() {
+export default function RegisterForm() {
 
-  const mutation = useMutation<RegisterResponse, Error, TRegister>({
-    mutationFn: async (values) => {
-      const cmd = registerSchema.parse(values); // validation runtime
-      return registerUser(cmd);
+
+  const {mutateAsync: registerUserAsync, isError, isPending, isSuccess, data} 
+    = useMutation<RegisterResponse, Error, TRegister>({
+    // mutationFn: async (values) => {
+    //   const cmd = registerSchema.parse(values); // validation runtime
+    //   return registerUser(cmd);
+    // },
+    mutationFn: registerUser,
+    onSuccess: (data) => {
+
+      console.log("User registered successfully:", data);
+    },
+    onError: (error) => {
+      console.error("Error registering user:", error);
     },
   });
 
@@ -23,9 +33,14 @@ export function RegisterForm() {
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (values: TRegister) => {
-    mutation.mutate(values);
+  const onSubmit: SubmitHandler<TRegister> = (values) => {
+    console.log(values);
+    registerUserAsync(values);
   };
+
+  if(isPending) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <form className="card p-4 shadow-sm" style={{ width: 380 }} onSubmit={handleSubmit(onSubmit)}>
@@ -46,18 +61,18 @@ export function RegisterForm() {
       <input className="form-control mb-3" placeholder="Confirmation" type="password" {...register("password_confirmation")} />
       {errors.password_confirmation && <p className="text-danger">{errors.password_confirmation.message}</p>}
 
-      <button className="btn btn-primary w-100" disabled={mutation.isPending}>
-        {mutation.isPending ? "Création..." : "Créer le compte"}
+      <button className="btn btn-primary w-100" disabled={isPending}>
+        {isPending ? "Création..." : "Créer le compte"}
       </button>
 
-      {mutation.isSuccess && (
+      {isSuccess && (
         <div className="alert alert-success mt-3">
-          {mutation.data.message}<br />
-          Bienvenue {mutation.data.user.fullname} !
+          {data.message}<br />
+          Bienvenue {data.user.fullname} !
         </div>
       )}
 
-      {mutation.isError && (
+      {isError && (
         <div className="alert alert-danger mt-3">Une erreur est survenue.</div>
       )}
     </form>

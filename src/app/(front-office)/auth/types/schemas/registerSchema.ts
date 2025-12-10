@@ -4,7 +4,7 @@ import { userSchema } from "./userSchema";
 
 export const registerSchema = z.object({
   fullname: z.string().min(2),
-  phone: z.string().min(8), // ajustable
+  phone: z.string().min(9), // ajustable
   email: z.email(),
   password: z.string().min(6),
   password_confirmation: z.string().min(6),
