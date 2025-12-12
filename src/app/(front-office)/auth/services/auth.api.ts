@@ -6,3 +6,7 @@ export const registerUser = async (data: ISignup) => {
   return response.data;
 }
 
+export const verifyPhone = async (data: { otp_code: string }) => {
+  const response =  await clientApi.post('/verify-phone', data);
+  return response.data;
+}

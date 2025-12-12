@@ -5,20 +5,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterResponse, type TRegister } from "../types/schemas/registerSchema";
 import { useMutation } from "@tanstack/react-query";
 import {registerUser} from "../services/auth.api" ;
+import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
 
-
+  const router = useRouter();
   const {mutateAsync: registerUserAsync, isError, isPending, isSuccess, data} 
     = useMutation<RegisterResponse, Error, TRegister>({
-    // mutationFn: async (values) => {
-    //   const cmd = registerSchema.parse(values); // validation runtime
-    //   return registerUser(cmd);
-    // },
     mutationFn: registerUser,
     onSuccess: (data) => {
-
       console.log("User registered successfully:", data);
+      // redirect('/auth/verifyphone');
+      router.push(`/auth/verify-phone?ref=${data.user.id}`);
     },
     onError: (error) => {
       console.error("Error registering user:", error);
