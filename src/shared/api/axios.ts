@@ -28,6 +28,17 @@ clientApi.interceptors.request.use((config) => {
 
 export default clientApi;
 
+
+export const authAPI = {
+  getUser: async () => {
+    const response = await clientApi.get('/user');
+    return response.data;
+  },
+  logout: async () => {
+    const response = await clientApi.post('/logout');
+    return response.data;
+  },
+};
 // import axios from 'axios';
 
 
