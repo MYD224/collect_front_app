@@ -5,25 +5,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { TVerifyPhone, VerifyPhoneResponse, verifyPhoneSchema } from "../types/schemas/registerSchema";
 import { verifyPhone } from "../services/auth.api";
 import { useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const OTP_LENGTH = 6;
 
 export default function verifyPhonePage() {
     const searchParams = useSearchParams();
     const user_id = searchParams.get("ref");
+    const router = useRouter();
 
-    const {mutateAsync: registerUserAsync, isError, isPending, isSuccess, data} 
+    const { mutateAsync: registerUserAsync, isError, isPending, isSuccess, data }
         = useMutation<VerifyPhoneResponse, Error, TVerifyPhone>({
-        mutationFn: verifyPhone,
-        onSuccess: (data) => {
-        console.log("User successfully verified:", data);
-        // redirect('/auth/verifyphone');
-        },
-        onError: (error) => {
-            console.error("Error verifying user:", error);
-        },
-    });
+            mutationFn: verifyPhone,
+            onSuccess: (data) => {
+                console.log("User successfully verified:", data);
+                if (data.access_token) {
+                    localStorage.setItem('access_token', data.access_token);
+                    router.push('/dashboard');
+                }
+            },
+            onError: (error) => {
+                console.error("Error verifying user:", error);
+            },
+        });
 
     const {
         register,
@@ -46,7 +50,7 @@ export default function verifyPhonePage() {
         registerUserAsync(values);
     };
 
-  
+
 
     const handleChange = (index: number, value: string) => {
         if (!/^\d?$/.test(value)) return;
@@ -60,11 +64,11 @@ export default function verifyPhonePage() {
 
         // focus next if value exists
         if (value && index < OTP_LENGTH - 1) {
-        inputRefs.current[index + 1]?.focus();
+            inputRefs.current[index + 1]?.focus();
         }
     };
 
-    if(isPending) {
+    if (isPending) {
         return <div>Loading...</div>;
     }
 
@@ -104,7 +108,7 @@ export default function verifyPhonePage() {
                 </button>
                 {isSuccess && (
                     <div className="alert alert-success mt-3">
-                        {data.access_token}<br />
+                        {/* {data.access_token}<br /> */}
                         Vérification réussie !
                     </div>
                 )}
@@ -115,29 +119,5 @@ export default function verifyPhonePage() {
             </form>
         </div>
 
-        // <div className="ml-3 mt-5">
-        //     <form className="card p-4 pl-2 shadow-sm" style={{ width: 380 }} onSubmit={handleSubmit(onSubmit)}>
-        //         <h3 className="mb-3">Vérification de compte</h3>
-
-        //         <input className="form-control mb-2" placeholder="otp_code" {...register("otp_code")} />
-        //         {errors.otp_code && <p className="text-danger">{errors.otp_code.message}</p>}
-
-        //         <button className="btn btn-primary w-100" disabled={isPending}>
-        //             {isPending ? "Vérification..." : "Vérifier le téléphone"}
-        //         </button>
-
-        //         {isSuccess && (
-        //             <div className="alert alert-success mt-3">
-        //                 {data.message}<br />
-        //                 Verification réussi !
-        //             </div>
-        //         )}
-
-        //         {isError && (
-        //             <div className="alert alert-danger mt-3">Une erreur est survenue.</div>
-        //         )}
-        //     </form>
-        // </div>
-        
     );
 }
