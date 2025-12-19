@@ -1,46 +1,61 @@
-import axios from 'axios';
+import axios from "axios";
 
-const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000/api/v1';
+const backendUrl =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api/v1";
 
 const clientApi = axios.create({
   baseURL: backendUrl,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     // Set Accept here, as it doesn't rely on localStorage
-    'Accept': 'application/json',
+    Accept: "application/json",
   },
 });
 
 // Use the request interceptor to safely attach the token
-clientApi.interceptors.request.use((config) => {
-  // Check if we are in a browser environment
-  if (typeof window !== 'undefined' && localStorage.getItem('access_token')) {
-    const token = localStorage.getItem('access_token');
-    
-    // Add the Authorization header to the request configuration
-    config.headers.Authorization = `Bearer ${token}`;
+clientApi.interceptors.request.use(
+  (config) => {
+    // Check if we are in a browser environment
+    if (typeof window !== "undefined" && localStorage.getItem("access_token")) {
+      const token = localStorage.getItem("access_token");
+
+      // Add the Authorization header to the request configuration
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+);
+
+// Gérer l'expiration du token (ex: redirection si 401)
+clientApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("auth_token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default clientApi;
 
-
-export const authAPI = {
-  getUser: async () => {
-    const response = await clientApi.get('/user');
-    return response.data;
-  },
-  logout: async () => {
-    const response = await clientApi.post('/logout');
-    return response.data;
-  },
-};
+// export const authAPI = {
+//   getUser: async () => {
+//     const response = await clientApi.get("/user");
+//     return response.data;
+//   },
+//   logout: async () => {
+//     const response = await clientApi.post("/logout");
+//     return response.data;
+//   },
+// };
 // import axios from 'axios';
-
 
 // const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000/api/v1';
 
